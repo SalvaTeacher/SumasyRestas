@@ -571,263 +571,462 @@ window.addEventListener('DOMContentLoaded', function() {
     }
 });
 
-// Código a añadir al final de scripts.js
+// Nuevo enfoque para dispositivos móviles - reemplaza completamente el sistema de arrastrar y soltar
+// Añade esto al final de tu archivo scripts.js
 
-// Variables para el manejo táctil
-let selectedNumberElement = null;
-let touchPreview = null;
-
-// Función para añadir soporte táctil a los elementos arrastrables
-function setupTouchEvents() {
-    // Sólo configurar el soporte táctil si es un dispositivo táctil
-    if ('ontouchstart' in window || navigator.maxTouchPoints) {
-        console.log('Configurando soporte táctil para arrastrar y soltar');
-        
-        // Añadir eventos táctiles a los números
-        document.querySelectorAll('.number-option').forEach(num => {
-            num.addEventListener('touchstart', handleNumberTouchStart, { passive: false });
-        });
-        
-        // Añadir eventos táctiles a las zonas de destino
-        document.querySelectorAll('.drop-zone').forEach(zone => {
-            zone.addEventListener('touchstart', handleDropZoneTouchStart, { passive: false });
-            zone.addEventListener('touchend', handleDropZoneTouchEnd, { passive: false });
-        });
-        
-        // Manejar toques en otras áreas para cancelar la selección
-        document.addEventListener('touchstart', function(e) {
-            if (!e.target.closest('.number-option') && !e.target.closest('.drop-zone')) {
-                clearTouchSelection();
-            }
-        }, { passive: true });
+document.addEventListener('DOMContentLoaded', function() {
+    // Detectar si estamos en dispositivo móvil
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    
+    if (isMobile) {
+        console.log("Dispositivo móvil detectado - Aplicando modo táctil");
+        enableMobileTouchMode();
     }
+});
+
+function enableMobileTouchMode() {
+    // Añadir clase al body para estilos específicos
+    document.body.classList.add('mobile-device');
+    
+    // Remover todos los eventos de arrastrar y soltar existentes
+    removeExistingDragEvents();
+    
+    // Añadir la interfaz de selección numérica para móviles
+    setupMobileNumberSelection();
+    
+    // Observar cambios en el DOM para actualizar los controladores en páginas nuevas
+    setupMutationObserver();
 }
 
-// Manejar el inicio de toque en un número
-function handleNumberTouchStart(e) {
-    e.preventDefault(); // Prevenir el comportamiento de desplazamiento por defecto
+function removeExistingDragEvents() {
+    // Eliminar atributos de arrastrar y eventos relacionados
+    document.querySelectorAll('.number-option').forEach(num => {
+        num.removeAttribute('draggable');
+        num.removeAttribute('ondragstart');
+    });
     
-    // Limpiar selección anterior
-    clearTouchSelection();
-    
-    // Marcar este número como seleccionado
-    selectedNumberElement = this;
-    selectedNumberElement.classList.add('touch-selected');
-    
-    // Crear indicador visual de elemento seleccionado
-    createTouchPreview(this);
-    
-    // Mostrar mensaje de instrucción
-    showTouchInstructions("Número seleccionado. Toca una casilla para colocarlo.");
-}
-
-// Manejar el inicio de toque en una zona de destino
-function handleDropZoneTouchStart(e) {
-    e.preventDefault();
-    
-    // Si hay un número seleccionado, resaltar la zona
-    if (selectedNumberElement) {
-        this.classList.add('touch-highlight');
-    }
-}
-
-// Manejar el fin de toque en una zona de destino
-function handleDropZoneTouchEnd(e) {
-    e.preventDefault();
-    
-    // Quitar resaltado
-    this.classList.remove('touch-highlight');
-    
-    // Si hay un número seleccionado, colocarlo en esta zona
-    if (selectedNumberElement) {
-        // Limpiar contenido previo en la zona
-        while (this.firstChild) {
-            this.removeChild(this.firstChild);
-        }
-        
-        // Crear copia del número seleccionado
-        const clone = selectedNumberElement.cloneNode(true);
-        clone.id = `${selectedNumberElement.id}-dropped-${Date.now()}`;
-        clone.dataset.value = selectedNumberElement.dataset.value;
-        clone.style.width = '100%';
-        clone.style.height = '100%';
-        clone.classList.remove('touch-selected');
-        clone.draggable = false;
-        
-        // Añadir el clon a la zona
-        this.appendChild(clone);
-        
-        // Limpiar la selección
-        clearTouchSelection();
-    }
-}
-
-// Crear un indicador visual para el elemento seleccionado
-function createTouchPreview(element) {
-    // Crear un elemento flotante para mostrar el número seleccionado
-    touchPreview = document.createElement('div');
-    touchPreview.className = 'touch-preview';
-    touchPreview.style.position = 'fixed';
-    touchPreview.style.zIndex = '1000';
-    touchPreview.style.bottom = '20px';
-    touchPreview.style.left = '50%';
-    touchPreview.style.transform = 'translateX(-50%)';
-    touchPreview.style.padding = '10px';
-    touchPreview.style.backgroundColor = 'rgba(255, 255, 0, 0.8)';
-    touchPreview.style.border = '2px solid #333';
-    touchPreview.style.borderRadius = '8px';
-    touchPreview.style.boxShadow = '0 2px 5px rgba(0,0,0,0.3)';
-    
-    // Añadir imagen del número
-    const previewImg = document.createElement('img');
-    previewImg.src = element.src;
-    previewImg.style.width = '50px';
-    previewImg.style.height = '50px';
-    touchPreview.appendChild(previewImg);
-    
-    // Añadir al DOM
-    document.body.appendChild(touchPreview);
-}
-
-// Mostrar instrucciones de toque
-function showTouchInstructions(message) {
-    // Buscar instrucciones existentes o crear nuevas
-    let instructions = document.getElementById('touch-instructions');
-    if (!instructions) {
-        instructions = document.createElement('div');
-        instructions.id = 'touch-instructions';
-        instructions.style.position = 'fixed';
-        instructions.style.top = '10px';
-        instructions.style.left = '50%';
-        instructions.style.transform = 'translateX(-50%)';
-        instructions.style.padding = '8px 12px';
-        instructions.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
-        instructions.style.color = 'white';
-        instructions.style.borderRadius = '4px';
-        instructions.style.fontSize = '14px';
-        instructions.style.zIndex = '1001';
-        instructions.style.maxWidth = '80%';
-        instructions.style.textAlign = 'center';
-        document.body.appendChild(instructions);
-    }
-    
-    // Actualizar mensaje
-    instructions.textContent = message;
-    
-    // Ocultar después de 3 segundos
-    setTimeout(() => {
-        if (instructions.parentNode) {
-            instructions.parentNode.removeChild(instructions);
-        }
-    }, 3000);
-}
-
-// Limpiar la selección actual
-function clearTouchSelection() {
-    // Quitar clase de selección
-    if (selectedNumberElement) {
-        selectedNumberElement.classList.remove('touch-selected');
-        selectedNumberElement = null;
-    }
-    
-    // Eliminar vista previa si existe
-    if (touchPreview && touchPreview.parentNode) {
-        touchPreview.parentNode.removeChild(touchPreview);
-        touchPreview = null;
-    }
-    
-    // Quitar cualquier resaltado de zonas
     document.querySelectorAll('.drop-zone').forEach(zone => {
-        zone.classList.remove('touch-highlight');
+        zone.removeAttribute('ondrop');
+        zone.removeAttribute('ondragover');
     });
 }
 
-// Añadir estilos para soporte táctil
-function addTouchStyles() {
-    const styleElement = document.createElement('style');
-    styleElement.textContent = `
-        .touch-selected {
-            box-shadow: 0 0 0 3px yellow, 0 0 10px 5px rgba(255,255,0,0.5);
-            transform: scale(1.1);
-            z-index: 10;
-        }
-        
-        .touch-highlight {
-            box-shadow: 0 0 0 3px #4CAF50, 0 0 10px 3px rgba(76,175,80,0.5);
-            animation: pulse 1s infinite;
-        }
-        
-        @keyframes pulse {
-            0% { box-shadow: 0 0 0 3px #4CAF50, 0 0 10px 3px rgba(76,175,80,0.5); }
-            50% { box-shadow: 0 0 0 5px #4CAF50, 0 0 15px 5px rgba(76,175,80,0.7); }
-            100% { box-shadow: 0 0 0 3px #4CAF50, 0 0 10px 3px rgba(76,175,80,0.5); }
-        }
-        
-        @media (max-width: 768px) {
-            .number-options {
-                display: grid;
-                grid-template-columns: repeat(5, 1fr);
-            }
-            
-            .number-option {
-                margin: 5px;
-                max-width: 50px;
-                max-height: 50px;
-            }
-            
-            .drop-zone {
-                min-height: 50px;
-                min-width: 50px;
-            }
-        }
-    `;
-    document.head.appendChild(styleElement);
-}
-
-// Ejecutar la configuración de eventos táctiles cuando se carga la página
-window.addEventListener('DOMContentLoaded', function() {
-    // Añadir estilos para soporte táctil
-    addTouchStyles();
-    
-    // Configurar eventos táctiles
-    setupTouchEvents();
-});
-
-// Asegurarse de configurar eventos táctiles después de cambiar de página
-const originalCambiarPagina = cambiarPagina;
-cambiarPagina = function(actual, siguiente) {
-    originalCambiarPagina(actual, siguiente);
-    
-    // Reconfigurar eventos táctiles después de un breve retraso
-    setTimeout(setupTouchEvents, 200);
-};
-
-// Mejoras a la adaptación móvil - asegurarse de que los números sean fáciles de tocar
-function optimizarInterfazMovil() {
-    const userAgent = navigator.userAgent.toLowerCase();
-    const isMobile = /iphone|ipad|ipod|android|blackberry|windows phone/g.test(userAgent);
-    
-    if (isMobile) {
-        console.log('Optimizando para interfaz móvil');
-        
-        // Ajustar el tamaño de los elementos para una mejor experiencia táctil
-        document.querySelectorAll('.number-option').forEach(num => {
-            num.style.margin = '8px';
-            num.style.minHeight = '45px';
-            num.style.minWidth = '45px';
-        });
-        
-        document.querySelectorAll('.drop-zone').forEach(zone => {
-            zone.style.minHeight = '50px';
-            zone.style.minWidth = '50px';
-        });
-        
-        // Añadir mensaje de instrucción al inicio
-        setTimeout(() => {
-            showTouchInstructions("Toca un número y luego toca una casilla para colocarlo");
-        }, 1000);
+function setupMobileNumberSelection() {
+    // Para cada página con desafíos (2-5)
+    for (let pageNum = 2; pageNum <= 5; pageNum++) {
+        setupPageForMobile(pageNum);
     }
 }
 
-// Ejecutar optimización móvil al cargar la página
-window.addEventListener('load', optimizarInterfazMovil);
+function setupPageForMobile(pageNum) {
+    const page = document.getElementById(`page${pageNum}`);
+    if (!page) return;
+    
+    // Obtener las zonas de colocación
+    const dropZone1 = page.querySelector(`#dropZone1-${pageNum}`);
+    const dropZone2 = page.querySelector(`#dropZone2-${pageNum}`);
+    
+    if (!dropZone1 || !dropZone2) return;
+    
+    // Convertir zonas de colocación en botones seleccionables
+    convertDropZoneToSelectable(dropZone1, pageNum, 1);
+    convertDropZoneToSelectable(dropZone2, pageNum, 2);
+    
+    // Crear y añadir el selector de números
+    createMobileNumberSelector(page, pageNum);
+}
+
+function convertDropZoneToSelectable(dropZone, pageNum, position) {
+    // Limpiar cualquier contenido y eventos existentes
+    dropZone.innerHTML = '';
+    
+    // Añadir indicador visual
+    const placeholder = document.createElement('div');
+    placeholder.className = 'mobile-placeholder';
+    placeholder.textContent = '?';
+    dropZone.appendChild(placeholder);
+    
+    // Añadir atributos de datos
+    dropZone.dataset.pageNum = pageNum;
+    dropZone.dataset.position = position;
+    dropZone.classList.add('mobile-drop-zone');
+    
+    // Añadir evento de clic
+    dropZone.addEventListener('click', function() {
+        activateNumberSelector(dropZone);
+    });
+}
+
+function createMobileNumberSelector(page, pageNum) {
+    // Crear contenedor del selector de números
+    const selector = document.createElement('div');
+    selector.id = `mobile-number-selector-${pageNum}`;
+    selector.className = 'mobile-number-selector';
+    selector.style.display = 'none';
+    
+    // Añadir título
+    const title = document.createElement('div');
+    title.className = 'mobile-selector-title';
+    title.textContent = 'Selecciona un número:';
+    selector.appendChild(title);
+    
+    // Añadir botones de números
+    const numberGrid = document.createElement('div');
+    numberGrid.className = 'mobile-number-grid';
+    
+    for (let i = 0; i <= 9; i++) {
+        const numButton = document.createElement('div');
+        numButton.className = 'mobile-number-button';
+        numButton.textContent = i;
+        numButton.dataset.value = i;
+        
+        // Añadir evento de clic al botón
+        numButton.addEventListener('click', function() {
+            selectNumber(parseInt(this.dataset.value), pageNum);
+        });
+        
+        numberGrid.appendChild(numButton);
+    }
+    selector.appendChild(numberGrid);
+    
+    // Añadir botón de cancelar
+    const cancelButton = document.createElement('button');
+    cancelButton.className = 'mobile-cancel-button';
+    cancelButton.textContent = 'Cancelar';
+    cancelButton.addEventListener('click', function() {
+        hideNumberSelector(pageNum);
+    });
+    selector.appendChild(cancelButton);
+    
+    // Añadir al DOM después del área de cálculo
+    const calculationArea = page.querySelector('.calculation');
+    if (calculationArea) {
+        calculationArea.after(selector);
+    } else {
+        page.appendChild(selector);
+    }
+}
+
+// Variable global para la zona actualmente seleccionada
+let activeDropZone = null;
+
+function activateNumberSelector(dropZone) {
+    const pageNum = dropZone.dataset.pageNum;
+    
+    // Guardar referencia a la zona activa
+    activeDropZone = dropZone;
+    
+    // Resaltar la zona seleccionada
+    document.querySelectorAll('.mobile-drop-zone').forEach(zone => {
+        zone.classList.remove('active');
+    });
+    dropZone.classList.add('active');
+    
+    // Mostrar el selector de números
+    const selector = document.getElementById(`mobile-number-selector-${pageNum}`);
+    if (selector) {
+        // Ocultar todos los selectores primero
+        document.querySelectorAll('.mobile-number-selector').forEach(sel => {
+            sel.style.display = 'none';
+        });
+        
+        // Mostrar el selector para esta página
+        selector.style.display = 'block';
+        
+        // Scroll al selector
+        selector.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+}
+
+function selectNumber(value, pageNum) {
+    if (!activeDropZone) return;
+    
+    // Limpiar la zona de colocación
+    activeDropZone.innerHTML = '';
+    
+    // Crear imagen del número
+    const numImg = new Image();
+    numImg.src = `./img/numeros/numero_${getNumberName(value)}.png`;
+    numImg.alt = `numero_${value}`;
+    numImg.className = 'mobile-selected-number';
+    numImg.dataset.value = value;
+    
+    // Añadir la imagen a la zona
+    activeDropZone.appendChild(numImg);
+    
+    // Ocultar el selector de números
+    hideNumberSelector(pageNum);
+    
+    // Limpiar la zona activa
+    activeDropZone.classList.remove('active');
+    activeDropZone = null;
+    
+    // Verificar si ambas zonas tienen números y habilitar el botón comprobar
+    checkIfBothZonesFilled(pageNum);
+}
+
+function getNumberName(value) {
+    const numberNames = ['cero', 'uno', 'dos', 'tres', 'cuatro', 'cinco', 'seis', 'siete', 'ocho', 'nueve'];
+    return numberNames[value] || 'cero';
+}
+
+function hideNumberSelector(pageNum) {
+    const selector = document.getElementById(`mobile-number-selector-${pageNum}`);
+    if (selector) {
+        selector.style.display = 'none';
+    }
+    
+    // Desactivar zona seleccionada
+    if (activeDropZone) {
+        activeDropZone.classList.remove('active');
+        activeDropZone = null;
+    }
+}
+
+function checkIfBothZonesFilled(pageNum) {
+    const zone1 = document.querySelector(`#dropZone1-${pageNum}`);
+    const zone2 = document.querySelector(`#dropZone2-${pageNum}`);
+    
+    const hasNumber1 = zone1 && zone1.querySelector('.mobile-selected-number');
+    const hasNumber2 = zone2 && zone2.querySelector('.mobile-selected-number');
+    
+    if (hasNumber1 && hasNumber2) {
+        // Opcional: resaltar el botón comprobar
+        const checkButton = document.querySelector(`#page${pageNum} button`);
+        if (checkButton) {
+            checkButton.classList.add('ready');
+            
+            // Mostrar animación para indicar que está listo
+            checkButton.animate([
+                { transform: 'scale(1)' },
+                { transform: 'scale(1.1)' },
+                { transform: 'scale(1)' }
+            ], {
+                duration: 500,
+                iterations: 2
+            });
+        }
+    }
+}
+
+// Modificar la función de verificación para que funcione con el nuevo sistema
+const originalCheckDragAnswer = window.checkDragAnswer;
+
+window.checkDragAnswer = function(pagina) {
+    const isMobile = document.body.classList.contains('mobile-device');
+    
+    if (isMobile) {
+        // Versión móvil de la función
+        const indiceDesafio = pagina - 2;
+        const respuestaCorrecta = desafios[indiceDesafio].respuesta;
+        
+        const dropZone1 = document.getElementById(`dropZone1-${pagina}`);
+        const dropZone2 = document.getElementById(`dropZone2-${pagina}`);
+        
+        const num1Element = dropZone1.querySelector('.mobile-selected-number');
+        const num2Element = dropZone2.querySelector('.mobile-selected-number');
+        
+        // Verificar si las zonas tienen números
+        if (!num1Element || !num2Element) {
+            document.getElementById(`feedback${pagina}`).textContent = "¡Por favor coloca los números en ambas casillas!";
+            document.getElementById(`feedback${pagina}`).className = 'feedback negative';
+            
+            // Resaltar las zonas vacías
+            if (!num1Element) dropZone1.classList.add('highlight-dropzone');
+            if (!num2Element) dropZone2.classList.add('highlight-dropzone');
+            
+            // Quitar la clase después de un tiempo
+            setTimeout(() => {
+                dropZone1.classList.remove('highlight-dropzone');
+                dropZone2.classList.remove('highlight-dropzone');
+            }, 800);
+            
+            return;
+        }
+        
+        // Obtener valores
+        const valor1 = parseInt(num1Element.dataset.value || "0", 10);
+        const valor2 = parseInt(num2Element.dataset.value || "0", 10);
+        const respuestaUsuario = valor1 * 10 + valor2;
+        
+        // Verificar si la respuesta es correcta
+        if (respuestaUsuario === respuestaCorrecta) {
+            document.getElementById(`feedback${pagina}`).textContent = "¡Correcto! ¡Muy bien hecho!";
+            document.getElementById(`feedback${pagina}`).className = 'feedback positive';
+            puntuacion++;
+            
+            // Desactivar interfaz
+            dropZone1.style.pointerEvents = 'none';
+            dropZone2.style.pointerEvents = 'none';
+            
+            // Mostrar el botón para continuar
+            setTimeout(() => {
+                if (pagina < 5) {
+                    cambiarPagina(pagina, pagina + 1);
+                } else {
+                    cambiarPagina(pagina, 6);
+                }
+            }, 1500);
+        } else {
+            document.getElementById(`feedback${pagina}`).textContent = "¡Ups! Esa no es la respuesta correcta. ¡Inténtalo de nuevo!";
+            document.getElementById(`feedback${pagina}`).className = 'feedback negative';
+        }
+    } else {
+        // Usar la función original para escritorio
+        originalCheckDragAnswer(pagina);
+    }
+};
+
+// Observar cambios en el DOM para configurar nuevas páginas
+function setupMutationObserver() {
+    const observer = new MutationObserver(function(mutations) {
+        mutations.forEach(function(mutation) {
+            if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
+                const target = mutation.target;
+                if (target.classList.contains('active') && target.id && target.id.startsWith('page')) {
+                    const pageNum = parseInt(target.id.replace('page', ''));
+                    if (pageNum >= 2 && pageNum <= 5) {
+                        console.log(`Página ${pageNum} activada - configurando para móvil`);
+                        setTimeout(() => setupPageForMobile(pageNum), 100);
+                    }
+                }
+            }
+        });
+    });
+    
+    // Observar cambios en las clases de todas las páginas
+    document.querySelectorAll('.page').forEach(page => {
+        observer.observe(page, { attributes: true });
+    });
+}
+
+// Añadir estilos CSS para la versión móvil
+function injectMobileStyles() {
+    const styleElement = document.createElement('style');
+    styleElement.textContent = `
+        /* Estilos para el modo móvil */
+        body.mobile-device .number-options {
+            display: none !important;
+        }
+        
+        .mobile-drop-zone {
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: all 0.3s ease;
+        }
+        
+        .mobile-drop-zone.active {
+            box-shadow: 0 0 0 3px #ff9800, 0 0 10px rgba(255, 152, 0, 0.5);
+            transform: scale(1.05);
+        }
+        
+        .mobile-placeholder {
+            font-size: 24px;
+            color: #999;
+            font-weight: bold;
+        }
+        
+        .mobile-number-selector {
+            background-color: white;
+            border: 2px solid #ccc;
+            border-radius: 8px;
+            padding: 10px;
+            margin: 15px 0;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+            z-index: 100;
+        }
+        
+        .mobile-selector-title {
+            font-weight: bold;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+        
+        .mobile-number-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        
+        .mobile-number-button {
+            background-color: #f0f0f0;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 10px 0;
+            text-align: center;
+            font-size: 20px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        
+        .mobile-number-button:hover, .mobile-number-button:active {
+            background-color: #e0e0e0;
+        }
+        
+        .mobile-selected-number {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+        
+        .mobile-cancel-button {
+            display: block;
+            width: 100%;
+            padding: 8px;
+            background-color: #f44336;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        
+        .highlight-dropzone {
+            animation: pulse-mobile 0.8s;
+        }
+        
+        @keyframes pulse-mobile {
+            0% { box-shadow: 0 0 0 0 rgba(255, 0, 0, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(255, 0, 0, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(255, 0, 0, 0); }
+        }
+        
+        button.ready {
+            background-color: #4CAF50;
+            box-shadow: 0 0 10px rgba(76, 175, 80, 0.5);
+        }
+        
+        /* Mejoras para la interfaz móvil */
+        @media (max-width: 768px) {
+            .calculation {
+                margin: 20px auto;
+            }
+            
+            .calculation-cell, .drop-zone {
+                width: 50px;
+                height: 50px;
+                font-size: 1.8rem;
+            }
+            
+            button {
+                padding: 12px 20px;
+                font-size: 16px;
+                margin: 10px 0;
+            }
+            
+            .mobile-number-button {
+                padding: 15px 0;
+                font-size: 24px;
+            }
+        }
+    `;
+    
+    document.head.appendChild(styleElement);
+}
+
+// Inyectar estilos CSS para móviles
+injectMobileStyles();
