@@ -454,3 +454,103 @@ button:hover {
         max-height: 15vh;
     }
 }
+/* Añadir estos estilos al archivo styles.css */
+
+/* Estilos responsivos para dispositivos móviles */
+@media (max-width: 768px) {
+    .container {
+        padding: 10px;
+        max-width: 100%;
+    }
+    
+    h1 {
+        font-size: 1.5rem;
+    }
+    
+    .story-text {
+        font-size: 0.9rem;
+    }
+    
+    .calculation {
+        max-width: 100%;
+    }
+    
+    .calculation-cell, .drop-zone {
+        width: 45px;
+        height: 45px;
+        font-size: 1.5rem;
+    }
+    
+    .number-options {
+        display: grid;
+        grid-template-columns: repeat(5, 1fr);
+        gap: 6px;
+        margin: 15px auto;
+    }
+    
+    .number-option {
+        width: calc(100% - 10px);
+        height: auto;
+        max-width: 48px;
+        max-height: 48px;
+        margin: 5px;
+        cursor: pointer;
+    }
+    
+    .story-selection {
+        flex-direction: column;
+    }
+    
+    .story-card {
+        width: 100%;
+        margin: 10px 0;
+    }
+    
+    button {
+        padding: 10px 15px;
+        font-size: 0.9rem;
+    }
+    
+    .button-group {
+        flex-direction: column;
+    }
+    
+    .button-group button {
+        margin: 5px 0;
+    }
+    
+    .dino-image {
+        max-width: 100%;
+        height: auto;
+    }
+}
+
+/* Clases específicas para el manejo táctil */
+.touch-dragging {
+    opacity: 0.7;
+}
+
+.drop-zone.active-target {
+    background-color: rgba(76, 175, 80, 0.3);
+    border: 2px dashed #4CAF50;
+}
+
+/* Mensaje de información para dispositivos táctiles */
+.touch-info {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    background-color: rgba(255, 193, 7, 0.9);
+    color: #333;
+    text-align: center;
+    padding: 10px;
+    font-size: 14px;
+    z-index: 1000;
+    animation: fadeOut 0.5s 3s forwards;
+}
+
+@keyframes fadeOut {
+    from { opacity: 1; }
+    to { opacity: 0; visibility: hidden; }
+}

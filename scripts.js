@@ -570,3 +570,264 @@ window.addEventListener('DOMContentLoaded', function() {
         }
     }
 });
+
+// Código a añadir al final de scripts.js
+
+// Variables para el manejo táctil
+let selectedNumberElement = null;
+let touchPreview = null;
+
+// Función para añadir soporte táctil a los elementos arrastrables
+function setupTouchEvents() {
+    // Sólo configurar el soporte táctil si es un dispositivo táctil
+    if ('ontouchstart' in window || navigator.maxTouchPoints) {
+        console.log('Configurando soporte táctil para arrastrar y soltar');
+        
+        // Añadir eventos táctiles a los números
+        document.querySelectorAll('.number-option').forEach(num => {
+            num.addEventListener('touchstart', handleNumberTouchStart, { passive: false });
+        });
+        
+        // Añadir eventos táctiles a las zonas de destino
+        document.querySelectorAll('.drop-zone').forEach(zone => {
+            zone.addEventListener('touchstart', handleDropZoneTouchStart, { passive: false });
+            zone.addEventListener('touchend', handleDropZoneTouchEnd, { passive: false });
+        });
+        
+        // Manejar toques en otras áreas para cancelar la selección
+        document.addEventListener('touchstart', function(e) {
+            if (!e.target.closest('.number-option') && !e.target.closest('.drop-zone')) {
+                clearTouchSelection();
+            }
+        }, { passive: true });
+    }
+}
+
+// Manejar el inicio de toque en un número
+function handleNumberTouchStart(e) {
+    e.preventDefault(); // Prevenir el comportamiento de desplazamiento por defecto
+    
+    // Limpiar selección anterior
+    clearTouchSelection();
+    
+    // Marcar este número como seleccionado
+    selectedNumberElement = this;
+    selectedNumberElement.classList.add('touch-selected');
+    
+    // Crear indicador visual de elemento seleccionado
+    createTouchPreview(this);
+    
+    // Mostrar mensaje de instrucción
+    showTouchInstructions("Número seleccionado. Toca una casilla para colocarlo.");
+}
+
+// Manejar el inicio de toque en una zona de destino
+function handleDropZoneTouchStart(e) {
+    e.preventDefault();
+    
+    // Si hay un número seleccionado, resaltar la zona
+    if (selectedNumberElement) {
+        this.classList.add('touch-highlight');
+    }
+}
+
+// Manejar el fin de toque en una zona de destino
+function handleDropZoneTouchEnd(e) {
+    e.preventDefault();
+    
+    // Quitar resaltado
+    this.classList.remove('touch-highlight');
+    
+    // Si hay un número seleccionado, colocarlo en esta zona
+    if (selectedNumberElement) {
+        // Limpiar contenido previo en la zona
+        while (this.firstChild) {
+            this.removeChild(this.firstChild);
+        }
+        
+        // Crear copia del número seleccionado
+        const clone = selectedNumberElement.cloneNode(true);
+        clone.id = `${selectedNumberElement.id}-dropped-${Date.now()}`;
+        clone.dataset.value = selectedNumberElement.dataset.value;
+        clone.style.width = '100%';
+        clone.style.height = '100%';
+        clone.classList.remove('touch-selected');
+        clone.draggable = false;
+        
+        // Añadir el clon a la zona
+        this.appendChild(clone);
+        
+        // Limpiar la selección
+        clearTouchSelection();
+    }
+}
+
+// Crear un indicador visual para el elemento seleccionado
+function createTouchPreview(element) {
+    // Crear un elemento flotante para mostrar el número seleccionado
+    touchPreview = document.createElement('div');
+    touchPreview.className = 'touch-preview';
+    touchPreview.style.position = 'fixed';
+    touchPreview.style.zIndex = '1000';
+    touchPreview.style.bottom = '20px';
+    touchPreview.style.left = '50%';
+    touchPreview.style.transform = 'translateX(-50%)';
+    touchPreview.style.padding = '10px';
+    touchPreview.style.backgroundColor = 'rgba(255, 255, 0, 0.8)';
+    touchPreview.style.border = '2px solid #333';
+    touchPreview.style.borderRadius = '8px';
+    touchPreview.style.boxShadow = '0 2px 5px rgba(0,0,0,0.3)';
+    
+    // Añadir imagen del número
+    const previewImg = document.createElement('img');
+    previewImg.src = element.src;
+    previewImg.style.width = '50px';
+    previewImg.style.height = '50px';
+    touchPreview.appendChild(previewImg);
+    
+    // Añadir al DOM
+    document.body.appendChild(touchPreview);
+}
+
+// Mostrar instrucciones de toque
+function showTouchInstructions(message) {
+    // Buscar instrucciones existentes o crear nuevas
+    let instructions = document.getElementById('touch-instructions');
+    if (!instructions) {
+        instructions = document.createElement('div');
+        instructions.id = 'touch-instructions';
+        instructions.style.position = 'fixed';
+        instructions.style.top = '10px';
+        instructions.style.left = '50%';
+        instructions.style.transform = 'translateX(-50%)';
+        instructions.style.padding = '8px 12px';
+        instructions.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
+        instructions.style.color = 'white';
+        instructions.style.borderRadius = '4px';
+        instructions.style.fontSize = '14px';
+        instructions.style.zIndex = '1001';
+        instructions.style.maxWidth = '80%';
+        instructions.style.textAlign = 'center';
+        document.body.appendChild(instructions);
+    }
+    
+    // Actualizar mensaje
+    instructions.textContent = message;
+    
+    // Ocultar después de 3 segundos
+    setTimeout(() => {
+        if (instructions.parentNode) {
+            instructions.parentNode.removeChild(instructions);
+        }
+    }, 3000);
+}
+
+// Limpiar la selección actual
+function clearTouchSelection() {
+    // Quitar clase de selección
+    if (selectedNumberElement) {
+        selectedNumberElement.classList.remove('touch-selected');
+        selectedNumberElement = null;
+    }
+    
+    // Eliminar vista previa si existe
+    if (touchPreview && touchPreview.parentNode) {
+        touchPreview.parentNode.removeChild(touchPreview);
+        touchPreview = null;
+    }
+    
+    // Quitar cualquier resaltado de zonas
+    document.querySelectorAll('.drop-zone').forEach(zone => {
+        zone.classList.remove('touch-highlight');
+    });
+}
+
+// Añadir estilos para soporte táctil
+function addTouchStyles() {
+    const styleElement = document.createElement('style');
+    styleElement.textContent = `
+        .touch-selected {
+            box-shadow: 0 0 0 3px yellow, 0 0 10px 5px rgba(255,255,0,0.5);
+            transform: scale(1.1);
+            z-index: 10;
+        }
+        
+        .touch-highlight {
+            box-shadow: 0 0 0 3px #4CAF50, 0 0 10px 3px rgba(76,175,80,0.5);
+            animation: pulse 1s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 3px #4CAF50, 0 0 10px 3px rgba(76,175,80,0.5); }
+            50% { box-shadow: 0 0 0 5px #4CAF50, 0 0 15px 5px rgba(76,175,80,0.7); }
+            100% { box-shadow: 0 0 0 3px #4CAF50, 0 0 10px 3px rgba(76,175,80,0.5); }
+        }
+        
+        @media (max-width: 768px) {
+            .number-options {
+                display: grid;
+                grid-template-columns: repeat(5, 1fr);
+            }
+            
+            .number-option {
+                margin: 5px;
+                max-width: 50px;
+                max-height: 50px;
+            }
+            
+            .drop-zone {
+                min-height: 50px;
+                min-width: 50px;
+            }
+        }
+    `;
+    document.head.appendChild(styleElement);
+}
+
+// Ejecutar la configuración de eventos táctiles cuando se carga la página
+window.addEventListener('DOMContentLoaded', function() {
+    // Añadir estilos para soporte táctil
+    addTouchStyles();
+    
+    // Configurar eventos táctiles
+    setupTouchEvents();
+});
+
+// Asegurarse de configurar eventos táctiles después de cambiar de página
+const originalCambiarPagina = cambiarPagina;
+cambiarPagina = function(actual, siguiente) {
+    originalCambiarPagina(actual, siguiente);
+    
+    // Reconfigurar eventos táctiles después de un breve retraso
+    setTimeout(setupTouchEvents, 200);
+};
+
+// Mejoras a la adaptación móvil - asegurarse de que los números sean fáciles de tocar
+function optimizarInterfazMovil() {
+    const userAgent = navigator.userAgent.toLowerCase();
+    const isMobile = /iphone|ipad|ipod|android|blackberry|windows phone/g.test(userAgent);
+    
+    if (isMobile) {
+        console.log('Optimizando para interfaz móvil');
+        
+        // Ajustar el tamaño de los elementos para una mejor experiencia táctil
+        document.querySelectorAll('.number-option').forEach(num => {
+            num.style.margin = '8px';
+            num.style.minHeight = '45px';
+            num.style.minWidth = '45px';
+        });
+        
+        document.querySelectorAll('.drop-zone').forEach(zone => {
+            zone.style.minHeight = '50px';
+            zone.style.minWidth = '50px';
+        });
+        
+        // Añadir mensaje de instrucción al inicio
+        setTimeout(() => {
+            showTouchInstructions("Toca un número y luego toca una casilla para colocarlo");
+        }, 1000);
+    }
+}
+
+// Ejecutar optimización móvil al cargar la página
+window.addEventListener('load', optimizarInterfazMovil);
