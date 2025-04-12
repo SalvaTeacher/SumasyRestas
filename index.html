@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aventuras Aritméticas</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1 id="main-title">Aventuras Aritméticas</h1>
+        
+        <!-- Página 0: Selección de historia -->
+        <div class="page active" id="page0">
+            <p class="story-text">¡Bienvenido a Aventuras Aritméticas! Selecciona una historia para comenzar tu aventura matemática:</p>
+            
+            <div class="story-selection">
+                <div class="story-card" data-story="dinosaurios" onclick="selectStory('dinosaurios', this)">
+                    <img src="./img/historias/paisaje_dinosaurios.png" alt="Dinosaurios">
+                    <h3>Dinosaurios</h3>
+                    <p>Ayuda a Trici el Triceratops a resolver enigmas matemáticos en su búsqueda del tesoro.</p>
+                </div>
+                
+                <div class="story-card" data-story="espacio" onclick="selectStory('espacio', this)">
+                    <img src="./img/historias/espacio.png" alt="Espacio">
+                    <h3>Aventura Espacial</h3>
+                    <p>Acompaña a Astro el astronauta a explorar el universo resolviendo operaciones matemáticas.</p>
+                </div>
+                
+                <div class="story-card" data-story="oceano" onclick="selectStory('oceano', this)">
+                    <img src="./img/historias/oceano.png" alt="Océano">
+                    <h3>Tesoro Submarino</h3>
+                    <p>Ayuda a Marina la sirena a descifrar el código del tesoro marino con tus habilidades matemáticas.</p>
+                </div>
+
+                <div class="story-card" data-story="trex" onclick="selectStory('trex', this)">
+                    <img src="./img/historias/trex.png" alt="T-Rex">
+                    <h3>Rex el T-Rex</h3>
+                    <p>Únete a Rex el T-Rex en una emocionante aventura jurásica resolviendo problemas matemáticos.</p>
+                </div>
+            </div>
+            
+            <div class="loading">
+                <div class="loading-spinner"></div>
+                <p>Cargando historia...</p>
+            </div>
+            
+            <button id="startBtn" onclick="cargarHistoriaSeleccionada()" disabled>Comenzar Aventura</button>
+        </div>
+        
+        <!-- Página 1: Inicio -->
+        <div class="page" id="page1">
+            <img class="dino-image" id="intro-image" src="" alt="imagen_intro">
+            <p class="story-text" id="intro-text1"></p>
+            <p class="story-text" id="intro-text2"></p>
+            <button id="startAdventureBtn" onclick="iniciarJuego()">¡Vamos a comenzar!</button>
+        </div>
+        
+        <!-- Página 2: Primer desafío -->
+        <div class="page" id="page2">
+            <img class="dino-image" id="challenge1-image" src="" alt="imagen_desafio1">
+            <p class="story-text" id="story2"></p>
+            <div class="question" id="question2"></div>
+            
+            <div class="calculation">
+                <div class="calculation-row">
+                    <div class="calculation-cell" id="decenas1-reto2"></div>
+                    <div class="calculation-cell" id="unidades1-reto2"></div>
+                </div>
+                <div class="calculation-row">
+                    <div class="calculation-operator" id="operador2"></div>
+                    <div class="calculation-cell" id="decenas2-reto2"></div>
+                    <div class="calculation-cell" id="unidades2-reto2"></div>
+                </div>
+                <div class="calculation-line"></div>
+                <div class="calculation-row">
+                    <div id="dropZone1-2" class="drop-zone" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+                    <div id="dropZone2-2" class="drop-zone" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+                </div>
+            </div>
+            
+            <div class="feedback" id="feedback2"></div>
+            <div class="help-box" id="help2"></div>
+            
+            <div class="button-group">
+                <button onclick="checkDragAnswer(2)">Comprobar</button>
+                <button id="helpBtn2" onclick="showHelp(2)">¿Necesitas ayuda?</button>
+                <button id="showResultBtn2" onclick="showResult(2)" class="secondary-btn">Ver Resultado</button>
+                <button id="newOperationBtn2" onclick="newOperation(2)" class="secondary-btn">Nueva Operación</button>
+            </div>
+        </div>
+        
+        <!-- Página 3: Segundo desafío -->
+        <div class="page" id="page3">
+            <img class="dino-image" id="challenge2-image" src="" alt="imagen_desafio2">
+            <p class="story-text" id="story3"></p>
+            <div class="question" id="question3"></div>
+            
+            <div class="calculation">
+                <div class="calculation-row">
+                    <div class="calculation-cell" id="decenas1-reto3"></div>
+                    <div class="calculation-cell" id="unidades1-reto3"></div>
+                </div>
+                <div class="calculation-row">
+                    <div class="calculation-operator" id="operador3"></div>
+                    <div class="calculation-cell" id="decenas2-reto3"></div>
+                    <div class="calculation-cell" id="unidades2-reto3"></div>
+                </div>
+                <div class="calculation-line"></div>
+                <div class="calculation-row">
+                    <div id="dropZone1-3" class="drop-zone" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+                    <div id="dropZone2-3" class="drop-zone" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+                </div>
+            </div>
+            
+            <div class="feedback" id="feedback3"></div>
+            <div class="help-box" id="help3"></div>
+            
+            <div class="button-group">
+                <button onclick="checkDragAnswer(3)">Comprobar</button>
+                <button id="helpBtn3" onclick="showHelp(3)">¿Necesitas ayuda?</button>
+                <button id="showResultBtn3" onclick="showResult(3)" class="secondary-btn">Ver Resultado</button>
+                <button id="newOperationBtn3" onclick="newOperation(3)" class="secondary-btn">Nueva Operación</button>
+            </div>
+        </div>
+        
+        <!-- Página 4: Tercer desafío -->
+        <div class="page" id="page4">
+            <img class="dino-image" id="challenge3-image" src="" alt="imagen_desafio3">
+            <p class="story-text" id="story4"></p>
+            <div class="question" id="question4"></div>
+            
+            <div class="calculation">
+                <div class="calculation-row">
+                    <div class="calculation-cell" id="decenas1-reto4"></div>
+                    <div class="calculation-cell" id="unidades1-reto4"></div>
+                </div>
+                <div class="calculation-row">
+                    <div class="calculation-operator" id="operador4"></div>
+                    <div class="calculation-cell" id="decenas2-reto4"></div>
+                    <div class="calculation-cell" id="unidades2-reto4"></div>
+                </div>
+                <div class="calculation-line"></div>
+                <div class="calculation-row">
+                    <div id="dropZone1-4" class="drop-zone" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+                    <div id="dropZone2-4" class="drop-zone" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+                </div>
+            </div>
+            
+            <div class="feedback" id="feedback4"></div>
+            <div class="help-box" id="help4"></div>
+            
+            <div class="button-group">
+                <button onclick="checkDragAnswer(4)">Comprobar</button>
+                <button id="helpBtn4" onclick="showHelp(4)">¿Necesitas ayuda?</button>
+                <button id="showResultBtn4" onclick="showResult(4)" class="secondary-btn">Ver Resultado</button>
+                <button id="newOperationBtn4" onclick="newOperation(4)" class="secondary-btn">Nueva Operación</button>
+            </div>
+        </div>
+        
+        <!-- Página 5: Cuarto desafío -->
+        <div class="page" id="page5">
+            <img class="dino-image" id="challenge4-image" src="" alt="imagen_desafio4">
+            <p class="story-text" id="story5"></p>
+            <div class="question" id="question5"></div>
+            
+            <div class="calculation">
+                <div class="calculation-row">
+                    <div class="calculation-cell" id="decenas1-reto5"></div>
+                    <div class="calculation-cell" id="unidades1-reto5"></div>
+                </div>
+                <div class="calculation-row">
+                    <div class="calculation-operator" id="operador5"></div>
+                    <div class="calculation-cell" id="decenas2-reto5"></div>
+                    <div class="calculation-cell" id="unidades2-reto5"></div>
+                </div>
+                <div class="calculation-line"></div>
+                <div class="calculation-row">
+                    <div id="dropZone1-5" class="drop-zone" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+                    <div id="dropZone2-5" class="drop-zone" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+                </div>
+            </div>
+                       
+            <div class="feedback" id="feedback5"></div>
+            <div class="help-box" id="help5"></div>
+            
+            <div class="button-group">
+                <button onclick="checkDragAnswer(5)">Comprobar</button>
+                <button id="helpBtn5" onclick="showHelp(5)">¿Necesitas ayuda?</button>
+                <button id="showResultBtn5" onclick="showResult(5)" class="secondary-btn">Ver Resultado</button>
+                <button id="newOperationBtn5" onclick="newOperation(5)" class="secondary-btn">Nueva Operación</button>
+            </div>
+        </div>
+        
+        <!-- Página 6: Final -->
+        <div class="page" id="page6">
+            <img class="dino-image" id="finale-image" src="" alt="imagen_final">
+            <p class="story-text" id="finale-text1"></p>
+            <p class="story-text" id="finale-text2"></p>
+            <p class="story-text" id="finale-text3"></p>
+            <button onclick="volverAlInicio()">Jugar otra aventura</button>
+        </div>
+
+         <!-- Bloque compartido de opciones numéricas -->
+         <div class="number-options" id="shared-number-options">
+            <img src="./img/numeros/numero_cero.png" alt="numero_cero" class="number-option" draggable="true" ondragstart="drag(event)" id="num0" data-value="0">
+            <img src="./img/numeros/numero_uno.png" alt="numero_uno" class="number-option" draggable="true" ondragstart="drag(event)" id="num1" data-value="1">
+            <img src="./img/numeros/numero_dos.png" alt="numero_dos" class="number-option" draggable="true" ondragstart="drag(event)" id="num2" data-value="2">
+            <img src="./img/numeros/numero_tres.png" alt="numero_tres" class="number-option" draggable="true" ondragstart="drag(event)" id="num3" data-value="3">
+            <img src="./img/numeros/numero_cuatro.png" alt="numero_cuatro" class="number-option" draggable="true" ondragstart="drag(event)" id="num4" data-value="4">
+            <img src="./img/numeros/numero_cinco.png" alt="numero_cinco" class="number-option" draggable="true" ondragstart="drag(event)" id="num5" data-value="5">
+            <img src="./img/numeros/numero_seis.png" alt="numero_seis" class="number-option" draggable="true" ondragstart="drag(event)" id="num6" data-value="6">
+            <img src="./img/numeros/numero_siete.png" alt="numero_siete" class="number-option" draggable="true" ondragstart="drag(event)" id="num7" data-value="7">
+            <img src="./img/numeros/numero_ocho.png" alt="numero_ocho" class="number-option" draggable="true" ondragstart="drag(event)" id="num8" data-value="8">
+            <img src="./img/numeros/numero_nueve.png" alt="numero_nueve" class="number-option" draggable="true" ondragstart="drag(event)" id="num9" data-value="9">
+        </div>
+
+    </div>
+    <!-- Incluir primero las funciones compartidas -->
+    <script src="operaciones-matematicas.js"></script>
+    
+    <!-- Luego incluir los archivos de las historias -->
+    <script src="dinosaurios.js"></script>
+    <script src="espacio.js"></script>
+    <script src="oceano.js"></script>
+    <script src="trex-story.js"></script>
+    <script src="scripts.js"></script>
+</body>
+</html>

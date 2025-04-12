@@ -1,0 +1,456 @@
+* {
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Comic Sans MS', cursive, sans-serif;
+    background-color: #9fe7a4;
+    color: #333;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    min-height: 100vh;
+    height: 100vh; /* Fija altura al 100% de la ventana */
+    overflow-x: hidden;
+}
+
+.container {
+    width: 95%;
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 10px;
+    background-color: #fff;
+    border-radius: 20px;
+    box-shadow: 0 0 20px rgba(0,0,0,0.2);
+    /* Ajusta altura máxima para evitar scroll */
+    max-height: 95vh;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+}
+
+h1 {
+    color: #ff6b6b;
+    font-size: clamp(1.2rem, 4vw, 1.8rem);
+    margin: 5px 0;
+}
+
+.page {
+    display: none;
+    animation: fadeIn 1s;
+    /* Ajusta para que ocupe el espacio disponible */
+    flex: 1;
+}
+
+.page.active {
+    display: flex;
+    flex-direction: column;
+}
+
+.story-text {
+    font-size: clamp(0.9rem, 3vw, 1.2rem);
+    line-height: 1.4;
+    margin-bottom: 10px;
+}
+
+.question {
+    font-size: clamp(1rem, 3.5vw, 1.3rem);
+    font-weight: bold;
+    color: #4a82d6;
+    margin: 10px 0;
+}
+
+.calculation {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 10px auto;
+    font-size: clamp(1.3rem, 5vw, 2rem);
+    font-family: monospace;
+    width: min(200px, 80%);
+}
+
+.calculation-row {
+    display: flex;
+    width: 100%;
+    justify-content: flex-end;
+}
+
+.calculation-cell {
+    width: clamp(25px, 8vw, 45px);
+    height: clamp(25px, 8vw, 45px);
+    text-align: center;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.calculation-operator {
+    align-self: center;
+    margin-right: auto;
+}
+
+.calculation-line {
+    width: 100%;
+    border-bottom: 3px solid black;
+    margin: 5px 0;
+}
+
+.dino-number {
+    width: clamp(50px, 12vw, 80px);
+    height: clamp(50px, 12vw, 80px);
+    object-fit: contain;
+}
+
+.feedback {
+    font-size: clamp(0.8rem, 2.5vw, 1rem);
+    font-weight: bold;
+    margin: 10px 0;
+    min-height: 20px;
+}
+
+.positive {
+    color: #2ecc71;
+}
+
+.negative {
+    color: #e74c3c;
+}
+
+button {
+    background-color: #4a82d6;
+    color: white;
+    border: none;
+    border-radius: 10px;
+    padding: clamp(6px, 1.5vw, 8px) clamp(10px, 2.5vw, 16px);
+    font-size: clamp(0.8rem, 2.5vw, 1rem);
+    cursor: pointer;
+    margin: 5px;
+    transition: background-color 0.3s;
+}
+
+button:hover {
+    background-color: #3b73c5;
+}
+
+/* Imagen adaptativa */
+.dino-image {
+    width: 100%;
+    max-width: min(400px, 90%);
+    height: auto;
+    object-fit: contain;
+    margin: 8px auto;
+    display: block;
+    /* Limita la altura para evitar scroll */
+    max-height: 25vh;
+}
+
+.help-box {
+    display: none;
+    background-color: #fffad7;
+    border: 2px dashed #ffc107;
+    border-radius: 15px;
+    padding: 8px;
+    margin: 8px 0;
+    font-size: clamp(0.8rem, 2.5vw, 1rem);
+    /* Mejor manejo de espacio para evitar scroll */
+    max-height: 25vh;
+    overflow-y: auto;
+}
+
+.number-options {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 6px;
+    margin: 10px 0;
+}
+
+.number-option {
+    width: clamp(25px, 7vw, 50px);
+    height: clamp(25px, 7vw, 50px);
+    cursor: grab;
+    object-fit: contain;
+}
+
+.drop-zone {
+    width: clamp(25px, 8vw, 45px);
+    height: clamp(25px, 8vw, 45px);
+    border: 3px dashed #4a82d6;
+    border-radius: 8px;
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    margin: 0 3px;
+    background-color: #f0f8ff;
+    transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+.drop-zone:hover {
+    border-color: #ff6b6b;
+    box-shadow: 0 0 5px rgba(255, 107, 107, 0.5);
+}
+
+.drop-zone img {
+    max-width: 100%;
+    max-height: 100%;
+}
+
+.result-container {
+    display: flex;
+    justify-content: flex-end;
+    width: min(200px, 80%);
+    margin: 0 auto;
+}
+
+/* Estilos para selección de historias */
+.story-selection {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
+    margin: 10px auto;
+}
+
+.story-card {
+    background-color: #f0f8ff;
+    border: 3px solid #4a82d6;
+    border-radius: 15px;
+    padding: 10px;
+    width: clamp(140px, 30%, 200px);
+    cursor: pointer;
+    transition: transform 0.3s, box-shadow 0.3s;
+    /* Limita la altura */
+    display: flex;
+    flex-direction: column;
+}
+
+.story-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 12px rgba(0,0,0,0.1);
+}
+
+.story-card.selected {
+    background-color: #d4e6ff;
+    border-color: #ff6b6b;
+}
+
+.story-card img {
+    width: 100%;
+    height: clamp(80px, 15vh, 110px);
+    object-fit: cover;
+    border-radius: 8px;
+    margin-bottom: 8px;
+}
+
+.story-card h3 {
+    color: #4a82d6;
+    margin: 5px 0;
+    font-size: clamp(0.9rem, 3vw, 1.1rem);
+}
+
+.story-card p {
+    font-size: clamp(0.7rem, 2.5vw, 0.9rem);
+    margin: 3px 0;
+    /* Limita la longitud del texto para evitar scroll */
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+/* Loading indicator */
+.loading {
+    display: none;
+    margin: 10px auto;
+    text-align: center;
+}
+
+.loading-spinner {
+    border: 4px solid #f3f3f3;
+    border-top: 4px solid #4a82d6;
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    animation: spin 1s linear infinite;
+    margin: 0 auto 8px;
+}
+
+.button-group {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 5px;
+    margin-top: auto; /* Empuja los botones hacia abajo */
+    padding-top: 10px;
+    padding-bottom: 5px; /* Espacio extra al final */
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+/* Estilo para resaltar las zonas de arrastre cuando hay un error */
+@keyframes highlightPulse {
+    0% { border-color: #e74c3c; box-shadow: 0 0 5px #e74c3c; }
+    50% { border-color: #ff9999; box-shadow: 0 0 10px #ff9999; }
+    100% { border-color: #e74c3c; box-shadow: 0 0 5px #e74c3c; }
+}
+
+.highlight-dropzone {
+    animation: highlightPulse 0.8s ease-in-out;
+    border-width: 3px;
+}
+
+/* Media queries para distintos dispositivos */
+@media (max-width: 480px) {
+    .container {
+        padding: 8px;
+        margin: 5px auto;
+        width: 98%;
+        border-radius: 15px;
+    }
+    
+    h1 {
+        font-size: clamp(1.1rem, 5vw, 1.5rem);
+        margin: 3px 0;
+    }
+    
+    .calculation {
+        margin: 8px auto;
+    }
+    
+    button {
+        padding: 5px 10px;
+        font-size: 0.85rem;
+        margin: 4px;
+    }
+    
+    .story-card {
+        width: 45%;
+        min-width: 120px;
+        padding: 8px;
+    }
+    
+    .story-card h3 {
+        font-size: 0.85rem;
+        margin: 3px 0;
+    }
+    
+    .story-card p {
+        font-size: 0.75rem;
+        -webkit-line-clamp: 2;
+    }
+    
+    .story-card img {
+        height: 70px;
+    }
+    
+    .dino-image {
+        max-height: 20vh;
+    }
+    
+    .help-box {
+        max-height: 20vh;
+    }
+}
+
+@media (min-width: 481px) and (max-width: 767px) {
+    .container {
+        max-height: 96vh;
+    }
+    
+    .story-card {
+        width: 180px;
+    }
+    
+    .dino-image {
+        max-height: 22vh;
+    }
+    
+    .help-box {
+        max-height: 22vh;
+    }
+}
+
+@media (min-width: 768px) {
+    .container {
+        padding: 15px;
+        max-height: 90vh;
+    }
+    
+    .story-text, .question {
+        max-width: 90%;
+        margin-left: auto;
+        margin-right: auto;
+    }
+    
+    button {
+        padding: 8px 16px;
+    }
+    
+    .dino-image {
+        max-height: 28vh;
+    }
+    
+    .help-box {
+        max-height: 25vh;
+    }
+}
+
+/* Para pantallas altas (móviles en vertical) */
+@media (max-height: 700px) {
+    .container {
+        padding: 8px;
+    }
+    
+    h1 {
+        margin: 3px 0;
+    }
+    
+    .story-text {
+        margin-bottom: 6px;
+    }
+    
+    .dino-image {
+        max-height: 22vh;
+        margin: 5px auto;
+    }
+    
+    .help-box {
+        max-height: 18vh;
+        padding: 6px;
+    }
+    
+    .button-group {
+        padding-top: 5px;
+    }
+}
+
+/* Para pantallas muy pequeñas */
+@media (max-height: 500px) {
+    h1 {
+        font-size: clamp(1rem, 3vw, 1.3rem);
+    }
+    
+    .dino-image {
+        max-height: 18vh;
+    }
+    
+    .story-card img {
+        height: 60px;
+    }
+    
+    .help-box {
+        max-height: 15vh;
+    }
+}
